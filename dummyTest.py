@@ -11,4 +11,4 @@ def greet(who):
     return greeting
 
 
-print(greet("Whoever lah"))
+print(greet("Whoever also"))
