@@ -15,14 +15,15 @@ class MainUI(QtWidgets.QMainWindow):
         enableDisableButton = QtWidgets.QPushButton("Enable/Disable")
 
         # ------------ topLayout ------------------------------
-        topLayout = QtWidgets.QVBoxLayout()
-        topLayout.setAlignment(QtCore.Qt.AlignTop)
+        topLayout = QtWidgets.QHBoxLayout()
+        topLayout.setAlignment(QtCore.Qt.AlignLeft)
         topLayout.addWidget(helloButton)
         topLayout.addWidget(byeButton)
+        topLayout.addStretch()
 
         # ------------ bottomLayout ---------------------------
-        bottomLayout = QtWidgets.QVBoxLayout()
-        bottomLayout.setAlignment(QtCore.Qt.AlignBottom)
+        bottomLayout = QtWidgets.QHBoxLayout()
+        bottomLayout.setAlignment(QtCore.Qt.AlignRight)
         bottomLayout.addStretch()
         bottomLayout.addWidget(hideUnhideButton)
         bottomLayout.addWidget(enableDisableButton)
@@ -39,8 +40,8 @@ class MainUI(QtWidgets.QMainWindow):
         # ------------ mainLayout -----------------------------
         mainLayout = QtWidgets.QVBoxLayout()
         mainLayout.setAlignment(QtCore.Qt.AlignTop)
-        mainLayout.setContentsMargins(5, 5, 5, 5)  # left, top, right, bottom
-        mainLayout.setSpacing(5)
+        mainLayout.setContentsMargins(0, 0, 0, 0)  # left, top, right, bottom
+        mainLayout.setSpacing(0)
         mainLayout.addWidget(topWidget)
         mainLayout.addWidget(bottomWidget)
 
@@ -55,8 +56,8 @@ class MainUI(QtWidgets.QMainWindow):
         mainWidget.setStyleSheet(widgetStyleSheet.widgetMain)
         mainWidget.setLayout(mainLayout)
 
-        self.setMinimumSize(200, 350)
-        self.setWindowTitle("QVBoxLayout Sample")
+        self.setMinimumSize(400, 100)
+        self.setWindowTitle("QHBoxLayout Sample")
         self.setCentralWidget(mainWidget)
         self.show()
 
@@ -78,7 +79,7 @@ class MainUI(QtWidgets.QMainWindow):
             widget.setStyleSheet(widgetStyleSheet.widgetDisabled)
             for i in range(layout.count()):
                 w = layout.itemAt(i).widget()
-                if (isinstance(w, QtWidgets.QPushButton)):
+                if (isinstance(w, QtWidgets.QPushButton)):                    
                     w.setFlat(True)
         else:
             widget.setEnabled(True)
@@ -87,7 +88,6 @@ class MainUI(QtWidgets.QMainWindow):
                 w = layout.itemAt(i).widget()
                 if (isinstance(w, QtWidgets.QPushButton)):
                     w.setFlat(False)
-
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
