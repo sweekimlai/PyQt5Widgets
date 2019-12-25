@@ -12,15 +12,15 @@ class Dialog(QtWidgets.QDialog):
         super(Dialog, self).__init__()
         mainLayout = QtWidgets.QVBoxLayout()
 
-        # ------------ QPushButton ---------------------------
+        # ------------ QPushButton --------------------------
         helloButton = QtWidgets.QPushButton("Hello QT World")
         byeButton = QtWidgets.QPushButton("Bye Bye QT World")
 
-        # ------------ Connections ---------------------------
+        # ------------ Connections --------------------------
         helloButton.clicked.connect(self.greetings)
         byeButton.clicked.connect(partial(self.sayBye, " Qt"))
 
-        # ------------ mainLayout ----------------------------
+        # ------------ mainLayout ---------------------------
         mainLayout.addWidget(helloButton)
         mainLayout.addWidget(byeButton)
 
