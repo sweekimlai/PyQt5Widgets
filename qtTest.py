@@ -1,41 +1,40 @@
-import sys
-import os
-from functools import partial
-from PyQt5 import QtCore
+from PyQt4.QtCore import QSize
+from PyQt4.QtGui import *
 
-# from PyQt5.QtWidgets import QDialog, QMainWindow, QApplication, QVBoxLayout
-from PyQt5 import QtWidgets
+class TabBar(QTabBar):
+    def tabSizeHint(self, index):
+        if index == self.count() - 1:
+            size = QSize(0, 0)
+            for i in range(self.count() - 1):
+                size += QTabBar.tabSizeHint(self, i)
+                return QSize(self.width() - size.width(), size.height())
+        else:
+            return QTabBar.tabSizeHint(self, index)
+          
+  
+app = QApplication([])
 
+w = QWidget()
+layout = QHBoxLayout()
 
-class Dialog(QtWidgets.QDialog):
-    def __init__(self):
-        super(Dialog, self).__init__()
-        mainLayout = QtWidgets.QVBoxLayout()
+leftLayout = QVBoxLayout()
+rightLayout = QVBoxLayout()
 
-        # ------------ QPushButton --------------------------
-        helloButton = QtWidgets.QPushButton("Hello QT World")
-        byeButton = QtWidgets.QPushButton("Bye Bye QT World")
+leftLayout.addWidget(QTextEdit())
 
-        # ------------ Connections --------------------------
-        helloButton.clicked.connect(self.greetings)
-        byeButton.clicked.connect(partial(self.sayBye, " Qt"))
+tabBar = TabBar()
+tabBar.addTab("Hippo")
+tabBar.addTab("Giraffe")
 
-        # ------------ mainLayout ---------------------------
-        mainLayout.addWidget(helloButton)
-        mainLayout.addWidget(byeButton)
+tempLayout = QHBoxLayout()
+tempLayout.addWidget(tabBar)
 
-        self.setLayout(mainLayout)
-        self.setMinimumSize(600, 400)
-        self.setWindowTitle("Basic Layouts")
+rightLayout.addLayout(tempLayout)
+rightLayout.addWidget(QListView())
 
-    def greetings(self):
-        print("You clicked Hello")
+layout.addLayout(leftLayout)
+layout.addLayout(rightLayout)
+w.setLayout(layout)
 
-    def sayBye(self, input):
-        print("Bye Bye {}".format(input))
-
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    dialog = Dialog()
-    sys.exit(dialog.exec_())
+w.show()
+app.exec_()
