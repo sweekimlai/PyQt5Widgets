@@ -1,229 +1,125 @@
+from PyQt5 import QtCore,QtWidgets,QtGui
+from PyQt5 import uic
 import sys
-from PyQt5.QtCore import QSize, pyqtSlot
-from PyQt5.QtCore import Qt
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QInputDialog
-from PyQt5.QtWidgets import QPushButton
-from PyQt5.QtWidgets import QTabBar
-from PyQt5.QtWidgets import QTabWidget
-from PyQt5.QtWidgets import QVBoxLayout
-from PyQt5.QtWidgets import QWidget
 
 
-class MyWidget(QWidget):
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(366, 440)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.lineEdit1 = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit1.setGeometry(QtCore.QRect(130, 150, 113, 20))
+        self.lineEdit1.setObjectName("lineEdit1")
+        self.lineEdit2 = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit2.setGeometry(QtCore.QRect(130, 180, 113, 20))
+        self.lineEdit2.setObjectName("lineEdit2")
+        self.lineEdit3 = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit3.setGeometry(QtCore.QRect(130, 210, 113, 20))
+        self.lineEdit3.setObjectName("lineEdit3")
+        self.comboBox = QtWidgets.QComboBox(self.centralwidget)
+        self.comboBox.setGeometry(QtCore.QRect(130, 270, 69, 22))
+        self.comboBox.setObjectName("comboBox")
+        self.comboBox2 = QtWidgets.QComboBox(self.centralwidget)
+        self.comboBox2.setGeometry(QtCore.QRect(130, 310, 69, 22))
+        self.comboBox2.setObjectName("comboBox2")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 366, 21))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
 
-    default_name = "New"
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def __init__(self):
-        super(MyWidget, self).__init__()
-        self.setStyleSheet("""
-                    border-radius: 4px;
-                    background:rgb(37,43,52,220);
-                """)
-        self.name = self.default_name
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
+class StoreCommand(QtWidgets.QUndoCommand):
 
+    def __init__(self, field, text):
+        QtWidgets.QUndoCommand.__init__(self)
+        # Record the field that has changed.
+        self.field = field
+        # Record the text at the time the command was created.
+        self.text = text
 
+    def undo(self):
+        # Remove the text from the file and set it in the field.
+        self.field.setText(self.text)
 
-class TabBarPlus(QTabBar):
-    """Tab bar that has a plus button floating to the right of the tabs."""
+    def redo(self):
+        # Store the text in the file and set it in the field.
+        self.field.setText(self.text)
 
-    plusClicked = pyqtSignal()
+class StoreComboCommand(QtWidgets.QUndoCommand):
 
-    def __init__(self, parent):
-        super(TabBarPlus, self).__init__()
-        self.setParent(parent)
+    def __init__(self, field, text):
+        QtWidgets.QUndoCommand.__init__(self)
+        # Record the field that has changed.
+        self.field = field
+        # Record the text at the time the command was created.
+        self.text = text
 
-        self.setStyleSheet(
-        """
-            QTabBar::tab {
-                width: 80px;
+    def undo(self):
+        # Remove the text from the file and set it in the field.
+        index = self.field.findText(self.text)
+        self.field.setCurrentIndex(index)
 
-            }
-
-           QTabBar::tab:selected {
-                font-family: Roboto;
-                font-size: 18px;
-                font: italic;
-                color: rgb(0,0,0,255);
-
-                background: rgb(234,234,234,255);
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
-
-                border:1px;
-                border-color: rgb(197,197,199,255);
-                border-top-style: solid;
-                border-right-style: solid;
-                border-left-style: solid;
-                padding: 10px 50px 10px 24px;
-
-           }
-
-           QTabBar::tab:!selected{
-                font-family: Roboto;
-                font-size: 18px;
-                font: italic;
-                color: rgb(255,255,255,255);
-                background: rgb(175,175,175,255);
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
-
-               border:1px;
-                border-color: rgb(197,197,199,255);
-                border-top-style: solid;
-                border-right-style: solid;
-                border-bottom-style: ;
-                border-left-style: solid;
-                padding: 10px 50px 10px 24px;
-            }
-
-        """)
-        # Plus Button
-        self.plusButton = QPushButton("+")
-        self.plusButton.setParent(self)
-        self.plusButton.setMaximumSize(20, 20) # Small Fixed size
-        self.plusButton.setMinimumSize(20, 20) # Small Fixed size
-        self.plusButton.clicked.connect(self.plusClicked.emit)
-        self.movePlusButton() # Move to the correct location
-    # end Constructor
-
-    def sizeHint(self):
-        """Return the size of the TabBar with increased width for the plus button."""
-        sizeHint = QTabBar.sizeHint(self)
-        width = sizeHint.width()
-        height = sizeHint.height()
-        return QSize(width+25, height)
-    # end tabSizeHint
-
-    def resizeEvent(self, event):
-        """Resize the widget and make sure the plus button is in the correct location."""
-        super().resizeEvent(event)
-
-        self.movePlusButton()
-    # end resizeEvent
-
-    def tabLayoutChange(self):
-        """This virtual handler is called whenever the tab layout changes.
-        If anything changes make sure the plus button is in the correct location.
-        """
-        super().tabLayoutChange()
-
-        self.movePlusButton()
-    # end tabLayoutChange
-
-    def mouseDoubleClickEvent(self, event):
-        if event.button() != Qt.LeftButton:
-            super(TabBarPlus, self).mouseDoubleClickEvent(event)
-
-        idx = self.currentIndex()
-        ok = True
-        self.input_dialog = QInputDialog()
-        print(type(self.input_dialog.textEchoMode()))
-
-        newName, ok = QInputDialog.getText(self, 'Mudar nome',
-                                        'Novo nome:')
-
-        if ok:
-            self.setTabText(idx, newName)
-
-    def open_kb(self):
-        print("open keyboard")
+    def redo(self):
+        # Store the text in the file and set it in the field.
+        index = self.field.findText(self.text)
+        self.field.setCurrentIndex(index)
 
 
+class Example(QtWidgets.QMainWindow,Ui_MainWindow):
+    def __init__(self,parent = None):
+        super().__init__()
+        self.setupUi(self)
+        self.comboBox.addItem('')
+        self.comboBox.addItem('H')
+        self.comboBox.addItem('N')
+        self.comboBox2.addItem('')
+        self.comboBox2.addItem('H')
+        self.comboBox2.addItem('N')
+        #
+        self.undoStack = QtWidgets.QUndoStack()
+        self.stackview = QtWidgets.QUndoView(self.undoStack)
+        #
+        self.lineEdit1.editingFinished.connect(self.storeFieldText)
+        self.lineEdit2.editingFinished.connect(self.storeFieldText)
+        self.lineEdit3.editingFinished.connect(self.storeFieldText)
+        self.comboBox.currentIndexChanged.connect(self.storeFieldComboText)
+        self.comboBox2.currentIndexChanged.connect(self.storeFieldComboText)
+        #Item actions
+        self.undoAction = self.undoStack.createUndoAction(self, self.tr("&Undo"))
+        self.undoAction.setShortcuts(QtGui.QKeySequence.Undo)
+        self.redoAction = self.undoStack.createRedoAction(self, self.tr("&Redo"))
+        self.redoAction.setShortcuts(QtGui.QKeySequence.Redo)
 
-    def movePlusButton(self):
-        """Move the plus button to the correct location."""
-        # Find the width of all of the tabs
-        size = 0
-        for i in range(self.count()):
-            size += self.tabRect(i).width()
+        self.itemToolbar = self.addToolBar("Item actions")
+        self.itemToolbar.addAction(self.undoAction)
+        self.itemToolbar.addAction(self.redoAction)
 
-        # Set the plus button location in a visible area
-        h = self.geometry().top()
-        w = self.width()
-        if size > w: # Show just to the left of the scroll buttons
-            self.plusButton.move(w-54, h)
-        else:
-            self.plusButton.move(size, h)
+    def storeFieldText(self):
+        command = StoreCommand(self.sender(),self.sender().text())
+        self.undoStack.push(command)
 
-    # end movePlusButton
-# end class MyClass
+    def storeFieldComboText(self):
+        command = StoreComboCommand(self.sender(),self.sender().currentText())
+        self.undoStack.push(command)
 
-class WidgetTab(QTabWidget):
-
-    layout = None
-    def __init__(self):
-        super(WidgetTab, self).__init__()
-        #self.setStyleSheet("""
-        #    border-radius: 4px;
-        #    background:rgb(37,43,52,220);
-        #""")
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-        self.setMinimumSize(800,400)
-        self.init_ui()
-
-    def init_ui(self):
-
-        # Tab Bar
-        self.tab = TabBarPlus(self)
-        self.setTabBar(self.tab)
-
-        # Properties
-        # self.setMovable(True)
-        # Signals
-        self.tab.plusClicked.connect(self.add_tab)
-        self.tab.tabMoved.connect(self.tab.movePlusButton)
-        self.tabCloseRequested.connect(self.removeTab)
-
-        self.add_tab()
-
-
-
-
-    def add_tab(self):
-        if self.count() >0:
-            self.setTabsClosable(True)
-        else:
-            self.setTabsClosable(False)
-
-
-
-        my_widget = MyWidget()
-
-
-        self.addTab(my_widget,my_widget.name)
-
-    def removeTab(self, p_int):
-        if self.count() > 1:
-            self.setTabsClosable(True)
-        else:
-            self.setTabsClosable(False)
-
-        try:
-            self.chart.removeSeries(self.series[p_int])
-            self.tables.remove(self.tables[p_int])
-            self.models.remove(self.models[p_int])
-            self.series.remove(self.series[p_int])
-        except:
-            pass
-
-        super(WidgetTab, self).removeTab(p_int)
-
-
-    @pyqtSlot()
-    def update_axes(self):
-
-        for s in self.series:
-            self.chart.removeSeries(s)
-            self.chart.addSeries(s)
-        self.chart.createDefaultAxes()
-
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    gui = Example()
+    gui.show()
+    gui.stackview.show()
+    sys.exit(app.exec_())    
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    wt = WidgetTab()
-    wt.show()
-    sys.exit(app.exec_())
+    main()
