@@ -9,19 +9,19 @@ from modules import widgetStyleSheet
 # QModelView using QAbstractListModel
 
 class zinListModel(QtCore.QAbstractListModel):
-    def __init__(self,datain,parent=None):
+    def __init__(self,listData,parent=None):
         QtCore.QAbstractListModel.__init__(self, parent)
-        self.listdata = datain
+        self.__listData = listData
 
     def rowCount(self, parent= QtCore.QModelIndex()): 
-        return len(self.listdata) 
+        return len(self.__listData)
  
     def data(self, index, role):
         if role == QtCore.Qt.EditRole:
-            return QtCore.QVariant(self.listdata[index.row()])
+            return QtCore.QVariant(self.__listData[index.row()])
 
         if index.isValid() and role == QtCore.Qt.DisplayRole:
-            return QtCore.QVariant(self.listdata[index.row()])
+            return QtCore.QVariant(self.__listData[index.row()])
         else: 
             return QtCore.QVariant()
 
@@ -31,25 +31,25 @@ class zinListModel(QtCore.QAbstractListModel):
     def setData(self, index, value, role = QtCore.Qt.EditRole):
         if role == QtCore.Qt.EditRole:            
             row = index.row()
-            self.listdata[row] = value
+            self.__listData[row] = value
             self.dataChanged.emit(index, index)
             return True
         return False
 
     def stringList(self):
-        return self.listdata
+        return self.__listData
 
     def addRow(self, parent = QtCore.QModelIndex()):
-        self.listdata.append('')
+        self.__listData.append('')
         return True
 
     def removeRows(self, position, rows=1, parent = QtCore.QModelIndex()):
         # rows is set to 1 as only one item is allowed per selection
         self.beginRemoveRows(parent, position, position + rows - 1)
         
-        for i in range(rows):
-            value = self.listdata[position]
-            self.listdata.remove(value)
+        for _ in range(rows):
+            value = self.__listData[position]
+            self.__listData.remove(value)
              
         self.endRemoveRows()
         return True
@@ -65,10 +65,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         # ------------ QListWidget ----------------------------
         leftListView = QtWidgets.QListView()
-        rightListView = QtWidgets.QListView()        
-
-        leftListView.installEventFilter(self)
-        rightListView.installEventFilter(self)
+        rightListView = QtWidgets.QListView()
 
         leftListView.setModel(listModel)
         rightListView.setModel(listModel)
@@ -114,7 +111,7 @@ class MainUI(QtWidgets.QMainWindow):
         mainWidget.setLayout(mainLayout)
 
         self.setMinimumSize(400, 100)
-        self.setWindowTitle("QModelView Sample 1")
+        self.setWindowTitle("QAbstractListModel Sample")
         self.setCentralWidget(mainWidget)
         self.show()
 

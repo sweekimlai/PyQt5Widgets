@@ -65,7 +65,7 @@ class MainUI(QtWidgets.QMainWindow):
         mainWidget.setLayout(mainLayout)
 
         self.setMinimumSize(400, 100)
-        self.setWindowTitle("QModelView Sample 1")
+        self.setWindowTitle("QStringListModel Sample")
         self.setCentralWidget(mainWidget)
         self.show()
 
