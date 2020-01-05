@@ -1,0 +1,7 @@
+<RCC>
+	<qresource>
+		<file alias="Transform.png">icons/transform.png</file>
+		<file alias="Camera.png">icons/camera.png</file>
+		<file alias="Light.png">icons/light.png</file>
+	</qresource>
+</RCC>
