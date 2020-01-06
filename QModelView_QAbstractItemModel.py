@@ -38,6 +38,22 @@ class Node(object):
         #print('Child row: {}'.format(row))
         return self._children[row]
 
+    def insertChild(self,position,child):
+        if position < 0 or position > len(self._children):
+            return False
+
+        self._children.insert(position,child)
+        child._parent = self
+        return True
+
+    def removeChild(self,position):
+        if position < 0 or position > len(self._children):
+            return False
+
+        child = self._children.pop(position)
+        child._parent = None
+        return True
+
     def childCount(self):
         #print('Get childCount: {}'.format(len(self._children)))
         return len(self._children)
@@ -74,21 +90,21 @@ class Node(object):
         return self.log()
 
 class TransformNode(Node):
-    def __init__(self,name,parent):
+    def __init__(self,name,parent=None):
         super(TransformNode,self).__init__(name,parent)
 
     def typeInfo(self):
         return 'TRANSFORM'
 
 class CameraNode(Node):
-    def __init__(self,name,parent):
+    def __init__(self,name,parent=None):
         super(CameraNode,self).__init__(name,parent)
 
     def typeInfo(self):
         return 'CAMERA'
 
 class LightNode(Node):
-    def __init__(self,name,parent):
+    def __init__(self,name,parent=None):
         super(LightNode,self).__init__(name,parent)
 
     def typeInfo(self):
@@ -204,6 +220,33 @@ class SceneGraphModel(QtCore.QAbstractItemModel):
             # Unlikely event when child item is invlaid, we return empty QModelIndex
             return QtCore.QModelIndex()
 
+    """INPUTS: int, int, QModelIndex"""
+    def insertRows(self,position,rows,parent=QtCore.QModelIndex()):
+        parentNode = self.getNode(parent)
+
+        self.beginInsertRows(parent, position, position + rows - 1)
+
+        for _ in range(rows):
+            childCount = parentNode.childCount()
+            childNode = Node('Untitled{}'.format(childCount))
+            success = parentNode.insertChild(position,childNode)
+
+        self.endInsertRows()
+
+        return success
+
+    """INPUTS: int, int, QModelIndex"""
+    def removeRows(self,position,rows,parent=QtCore.QModelIndex()):
+        parentNode = self.getNode(parent)
+
+        self.beginRemoveRows(parent, position, position + rows - 1)
+
+        for _ in range(rows):            
+            success = parentNode.removeChild(position)
+
+        self.endRemoveRows()
+
+        return success
 
 
 class MainUI(QtWidgets.QMainWindow):
@@ -258,8 +301,8 @@ class MainUI(QtWidgets.QMainWindow):
         # ------------ Connections ----------------------------
         #debugPushButton.clicked.connect(partial(self.debug,tableModel))
         #selectionPushButton.clicked.connect(partial(self.getSelection,tableView))
-        #addPushButton.clicked.connect(partial(self.addNewRow,tableModel,tableView))
-        #removePushButton.clicked.connect(partial(self.removeRow,tableModel,tableView))
+        addPushButton.clicked.connect(partial(self.addNewRow,treeModel))
+        removePushButton.clicked.connect(partial(self.removeRow,treeModel))
 
         # ------------ mainWidget -----------------------------
         mainWidget = QtWidgets.QWidget()
@@ -272,6 +315,12 @@ class MainUI(QtWidgets.QMainWindow):
 
     def debug(self):
         pass
+
+    def addNewRow(self,treeModel):
+        treeModel.insertRows(1,2)
+
+    def removeRow(self,treeModel):
+        treeModel.removeRows(0,1)
         
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
